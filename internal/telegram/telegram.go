@@ -49,7 +49,7 @@ func (tbs *TgBotService) Init() {
 func (tbs *TgBotService) Start() error {
 
 	if tbs.b == nil {
-		return fmt.Errorf("Bot instance is empty")
+		return fmt.Errorf("bot instance is %v", tbs.b)
 	}
 
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
@@ -77,9 +77,9 @@ func (tbs *TgBotService) SetRegexHandler(pattern string, handlers ...func(Handle
 			})
 
 			if err != nil {
-				slog.Error("read file error:", err)
+				slog.Error("read file", slog.Any("error", err))
 			} else {
-				slog.Info("Load image", f)
+				slog.Info("Load image", slog.Any("GetFile", f))
 				url := tbs.b.FileDownloadLink(f)
 
 				b := loadImage(url)
@@ -98,7 +98,7 @@ func (tbs *TgBotService) SetRegexHandler(pattern string, handlers ...func(Handle
 				ParseMode: models.ParseModeMarkdownV1,
 			})
 			if err != nil {
-				slog.Error("send message error:", err)
+				slog.Error("send message", slog.Any("error", err))
 			}
 		}
 
@@ -106,13 +106,13 @@ func (tbs *TgBotService) SetRegexHandler(pattern string, handlers ...func(Handle
 }
 
 func defaultHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
-	slog.Info("defaultHandler", update.Message)
+	slog.Info("defaultHandler", slog.Any("update.Message", update.Message))
 }
 
 func loadImage(url string) []byte {
 	resp, err := http.Get(url)
 	if err != nil {
-		slog.Error("download image error:", err)
+		slog.Error("download image error", slog.Any("error", err))
 	}
 	defer resp.Body.Close()
 
@@ -120,7 +120,7 @@ func loadImage(url string) []byte {
 	reader := bufio.NewReader(resp.Body)
 	_, err = io.Copy(buffer, reader)
 	if err != nil {
-		slog.Error("read image error:", err)
+		slog.Error("read image", slog.Any("error", err))
 	}
 
 	return buffer.Bytes()
