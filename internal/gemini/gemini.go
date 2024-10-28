@@ -59,12 +59,12 @@ func (gs *GeminiService) SendText(ctx context.Context, query string) (string, er
 	return res, nil
 }
 
-func (gs *GeminiService) SendAudio(ctx context.Context, query string) (string, error) {
+func (gs *GeminiService) SendImage(ctx context.Context, query string, format string, data *[]byte) (string, error) {
 	if gs.model == nil {
 		return "", fmt.Errorf("AIModel is nil")
 	}
 
-	r, err := gs.model.GenerateContent(ctx, genai.Text(query))
+	r, err := gs.model.GenerateContent(ctx, genai.Text(query), genai.ImageData(format, *data))
 	if err != nil {
 		return "", err
 	}

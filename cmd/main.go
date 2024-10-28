@@ -17,13 +17,29 @@ func main() {
 	gSvc := gemini.NewGeminiService(os.Getenv("GEMINI_API_KEY"))
 	gSvc.Create(ctx, gemini.GEMINI_FLASH)
 
-	tgSvc.SetRegexHandler(`^[^/].*`, func(s string) string {
-		res, err := gSvc.SendText(ctx, s)
+	tgSvc.SetRegexHandler(`^[^/].*`, func(ha tg.HandlerArgs) string {
+		return "Сообщение в обработке"
+	}, func(ha tg.HandlerArgs) string {
+		res, err := gSvc.SendText(ctx, ha.Text)
 		if err != nil {
 			return "GEMINI error"
 		}
 
 		return res
+	})
+
+	tgSvc.SetRegexHandler(``, func(ha tg.HandlerArgs) string {
+		return "Сообщение в обработке"
+	}, func(ha tg.HandlerArgs) string {
+		if ha.Image != nil {
+			res, err := gSvc.SendImage(ctx, ha.Text, "jpeg", ha.Image)
+			if err != nil {
+				return "GEMINI error"
+			}
+
+			return res
+		}
+		return "Прикрепи изображение"
 	})
 
 	tgSvc.Start()
